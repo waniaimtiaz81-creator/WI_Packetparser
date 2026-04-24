@@ -1,0 +1,154 @@
+`timescale 1ns/1ps
+
+// ============================================================
+// tb_uart_chacha.v
+// UART + ChaCha20 Integration Testbench
+// ============================================================
+
+module tb_uart_chacha;
+
+    reg  clk;
+    reg  raw_reset;
+    reg  rx;
+    wire tx;
+
+    // Baud period: 9600 baud @ 50MHz = 5208 cycles * 20ns = 104160 ns
+    localparam BAUD_PERIOD = 104160;
+
+    // --------------------------------------------------------
+    // DUT Instantiation
+    // --------------------------------------------------------
+    uart_chacha_top dut (
+        .clk       (clk),
+        .raw_reset (raw_reset),
+        .rx        (rx),
+        .tx        (tx)
+    );
+
+    // --------------------------------------------------------
+    // Clock: 50 MHz → 20ns period
+    // --------------------------------------------------------
+    always #10 clk = ~clk;
+
+    // --------------------------------------------------------
+    // Task: UART se ek byte bhejo (8N1 format)
+    // --------------------------------------------------------
+    task uart_send_byte;
+        input [7:0] data;
+        integer i;
+        begin
+            // Start bit
+            rx = 0;
+            #(BAUD_PERIOD);
+            // 8 data bits (LSB first)
+            for (i = 0; i < 8; i = i + 1) begin
+                rx = data[i];
+                #(BAUD_PERIOD);
+            end
+            // Stop bit
+            rx = 1;
+            #(BAUD_PERIOD);
+        end
+    endtask
+
+    // --------------------------------------------------------
+    // Task: UART TX line se ek byte receive karo
+    // --------------------------------------------------------
+    reg [7:0] received_byte;
+    task uart_receive_byte;
+        integer i;
+        begin
+            // Start bit ka intezaar
+            @(negedge tx);
+            #(BAUD_PERIOD / 2);  // Middle mein sample karo
+
+            // 8 data bits
+            for (i = 0; i < 8; i = i + 1) begin
+                #(BAUD_PERIOD);
+                received_byte[i] = tx;
+            end
+            // Stop bit skip
+            #(BAUD_PERIOD);
+        end
+    endtask
+
+    // --------------------------------------------------------
+    // Received ciphertext store karne ka array
+    // --------------------------------------------------------
+    reg [7:0] cipher_out [0:63];
+    integer idx;
+
+    // --------------------------------------------------------
+    // Main Test
+    // --------------------------------------------------------
+    integer j;
+
+    initial begin
+        $dumpfile("uart_chacha_tb.vcd");
+        $dumpvars(0, tb_uart_chacha);
+
+        // Initialize
+        clk       = 0;
+        rx        = 1;   // UART idle = HIGH
+        raw_reset = 1;
+        #200;
+        raw_reset = 0;
+        #(BAUD_PERIOD);
+
+        $display("================================================");
+        $display("   UART + ChaCha20 Integration Testbench");
+        $display("================================================");
+        $display("Sending 64 zero bytes as plaintext...");
+
+        // ------------------------------------------------
+        // 64 zero bytes bhejo (plaintext)
+        // ------------------------------------------------
+        for (j = 0; j < 64; j = j + 1) begin
+            uart_send_byte(8'h00);
+        end
+
+        $display("64 bytes sent! Waiting for encrypted output...");
+
+        // ------------------------------------------------
+        // 64 encrypted bytes receive karo
+        // ------------------------------------------------
+        for (idx = 0; idx < 64; idx = idx + 1) begin
+            uart_receive_byte;
+            cipher_out[idx] = received_byte;
+        end
+
+        // ------------------------------------------------
+        // Output display
+        // ------------------------------------------------
+        $display("\n--- Ciphertext Output (64 bytes) ---");
+        for (idx = 0; idx < 64; idx = idx + 4) begin
+            $display("  Byte[%02d-%02d]: %02h %02h %02h %02h",
+                idx, idx+3,
+                cipher_out[idx],   cipher_out[idx+1],
+                cipher_out[idx+2], cipher_out[idx+3]);
+        end
+
+        $display("\n--- Word-wise Output (matches ModelSim format) ---");
+        for (idx = 0; idx < 16; idx = idx + 1) begin
+            $display("  data_out[%02d] = 0x%02h%02h%02h%02h",
+                idx,
+                cipher_out[idx*4+3], cipher_out[idx*4+2],
+                cipher_out[idx*4+1], cipher_out[idx*4+0]);
+        end
+
+        $display("\n================================================");
+        $display("   Testbench Complete!");
+        $display("================================================");
+        $finish;
+    end
+
+    // --------------------------------------------------------
+    // Timeout guard
+    // --------------------------------------------------------
+    initial begin
+        #500000000;  // 500ms timeout
+        $display("TIMEOUT! Simulation too long.");
+        $finish;
+    end
+
+endmodule
