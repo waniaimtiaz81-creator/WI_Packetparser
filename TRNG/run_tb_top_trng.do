@@ -10,7 +10,8 @@ vlog -sv dff.v
 vlog -sv shift_register.v      
 vlog -sv top_trng.sv             
 vlog -sv comb_d.sv    
-vlog -sv ro.sv                    
+vlog -sv comb_d_without_von.sv
+vlog -sv ro_simulation.sv                    
 vlog -sv vonneuman_corrector.v  
 
 vlog -sv tb_top_trng.sv 

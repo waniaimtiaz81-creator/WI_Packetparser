@@ -15,7 +15,7 @@ module tb_top_trng ();
 	logic        rst       = 1;
 	logic        load      = 0;
 	logic [31:0] shift_reg    ;
-	comb_d i_comb_d (
+	comb_d_without_von i_comb_d (
 		.clk      (clk      ),
 		.en       (en       ),
 		.rst      (rst      ),
