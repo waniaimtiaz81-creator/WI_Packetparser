@@ -8,12 +8,15 @@ vlib work
 vlog -sv ../rtl/top_module.sv
 vlog -sv ../rtl/trng_to_chacha.sv
 vlog -sv ../rtl/trng_or_uart_to_chacha.sv
+vlog -sv ../rtl/seven_seg_display.sv
+vlog -sv ../rtl/status_counter.sv
+vlog -sv ../rtl/mux_to_uart_tx.sv
 
 vlog -sv ../../TRNG/dff.v                   
 vlog -sv ../../TRNG/shift_register.v      
 vlog -sv ../../TRNG/comb_d.sv    
 vlog -sv ../../TRNG/comb_d_without_von.sv
-vlog -sv ../../TRNG/ro.sv                    
+vlog -sv ../../TRNG/ro_simulation.sv                    
 vlog -sv ../../TRNG/vonneuman_corrector.v 
 
 vlog -sv ../../uart_plus_chacha_integration/baud_gen.v
