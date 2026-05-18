@@ -61,6 +61,9 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../TRNG/comb_d.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/trng_to_chacha.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/trng_or_uart_to_chacha.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/top_module.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/seven_seg_display.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/status_counter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/mux_to_uart_tx.sv
 set_global_assignment -name SDC_FILE top_module.sdc
 
 set_global_assignment -name VERILOG_MACRO SYNTHESIS
