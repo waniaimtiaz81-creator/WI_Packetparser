@@ -105,7 +105,7 @@ module top_module (
 
 	genvar i;
 	generate
-		for (i = 0; i < 8; i++) begin
+		for (i = 0; i < 8; i++) begin : generate_hex
 			seven_seg_display i_seven_seg_display (
 				.hex_value(hex_value[i*4+:4]),
 				.segments (segment[i]       )
