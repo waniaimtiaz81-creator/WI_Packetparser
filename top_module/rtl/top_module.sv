@@ -8,10 +8,6 @@ module top_module (
 	output logic [6:0] HEX_1    ,
 	output logic [6:0] HEX_2    ,
 	output logic [6:0] HEX_3    ,
-	output logic [6:0] HEX_4    ,
-	output logic [6:0] HEX_5    ,
-	output logic [6:0] HEX_6    ,
-	output logic [6:0] HEX_7    ,
 	input  logic       rx       ,
 	output logic       tx
 );
@@ -29,7 +25,7 @@ module top_module (
 	logic         trng_data_out_vld;
 
 	logic [31:0]      hex_value;
-	logic [ 7:0][6:0] segment  ;
+	logic [ 3:0][6:0] segment  ;
 
 	logic [511:0] chacha_data_in               ;
 	logic         chacha_data_in_vld           ;
@@ -105,7 +101,7 @@ module top_module (
 
 	genvar i;
 	generate
-		for (i = 0; i < 8; i++) begin : generate_hex
+		for (i = 0; i < 4; i++) begin : generate_hex
 			seven_seg_display i_seven_seg_display (
 				.hex_value(hex_value[i*4+:4]),
 				.segments (segment[i]       )
