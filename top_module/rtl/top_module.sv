@@ -8,13 +8,6 @@ module top_module (
 	output logic [6:0] HEX_1    ,
 	output logic [6:0] HEX_2    ,
 	output logic [6:0] HEX_3    ,
-<<<<<<< HEAD
-	// output logic [6:0] HEX_4    ,
-	// output logic [6:0] HEX_5    ,
-	// output logic [6:0] HEX_6    ,
-	// output logic [6:0] HEX_7    ,
-=======
->>>>>>> 42a9986db2579a9ff5401e87457ebcc7233d73ff
 	input  logic       rx       ,
 	output logic       tx
 );
@@ -112,11 +105,7 @@ module top_module (
 
 	genvar i;
 	generate
-<<<<<<< HEAD
-		for (i = 0; i < 4; i++) begin : new_block
-=======
 		for (i = 0; i < 4; i++) begin : generate_hex
->>>>>>> 42a9986db2579a9ff5401e87457ebcc7233d73ff
 			seven_seg_display i_seven_seg_display (
 				.hex_value(hex_value[i*4+:4]),
 				.segments (segment[i]       )
@@ -128,10 +117,6 @@ module top_module (
 	assign HEX_1 = segment[1];
 	assign HEX_2 = segment[2];
 	assign HEX_3 = segment[3];
-	// assign HEX_4 = segment[4];
-	// assign HEX_5 = segment[5];
-	// assign HEX_6 = segment[6];
-	// assign HEX_7 = segment[7];
 
 	trng_to_chacha i_trng_to_chacha (
 		.clk             (clk              ),
