@@ -12,7 +12,7 @@ vlog -sv ../rtl/seven_seg_display.sv
 vlog -sv ../rtl/status_counter.sv
 vlog -sv ../rtl/mux_to_uart_tx.sv
 
-vlog -sv ../../TRNG/dff.v                   
+vlog -sv ../../TRNG/dff_logic.v                   
 vlog -sv ../../TRNG/shift_register.v      
 vlog -sv ../../TRNG/comb_d.sv    
 vlog -sv ../../TRNG/comb_d_without_von.sv

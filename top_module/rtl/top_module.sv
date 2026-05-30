@@ -1,6 +1,6 @@
 module top_module (
 	input  logic       clk      ,
-	input  logic       reset    ,
+	input  logic       raw_reset,
 	input  logic       en       ,
 	input  logic       load     ,
 	input  logic [1:0] mux_slect,
@@ -8,10 +8,10 @@ module top_module (
 	output logic [6:0] HEX_1    ,
 	output logic [6:0] HEX_2    ,
 	output logic [6:0] HEX_3    ,
-	output logic [6:0] HEX_4    ,
-	output logic [6:0] HEX_5    ,
-	output logic [6:0] HEX_6    ,
-	output logic [6:0] HEX_7    ,
+	// output logic [6:0] HEX_4    ,
+	// output logic [6:0] HEX_5    ,
+	// output logic [6:0] HEX_6    ,
+	// output logic [6:0] HEX_7    ,
 	input  logic       rx       ,
 	output logic       tx
 );
@@ -29,7 +29,7 @@ module top_module (
 	logic         trng_data_out_vld;
 
 	logic [31:0]      hex_value;
-	logic [ 7:0][6:0] segment  ;
+	logic [ 3:0][6:0] segment  ;
 
 	logic [511:0] chacha_data_in               ;
 	logic         chacha_data_in_vld           ;
@@ -46,10 +46,14 @@ module top_module (
 	logic       uart_tx_data_out_vld;
 	logic       chacha_to_uart_busy ;
 
-	logic [512:0] status_data           ;
+	logic [511:0] status_data           ;
 	logic         status_data_vld       ;
-	logic [512:0] mux_out_data_to_tx    ;
+	logic [511:0] mux_out_data_to_tx    ;
 	logic         mux_out_data_to_tx_vld;
+
+  logic         reset                 ;
+
+  assign reset = ~raw_reset;
 
 	baud_gen #(.BAUD_DIV(5208)) i_baud_gen (
 		.clk  (clk  ),
@@ -76,16 +80,16 @@ module top_module (
 		.data_out_vld(uarts_rx_data_out_vld)
 	);
 
-// `ifdef WITH_VONNEUMAN
-	// comb_d trng (
-	// .clk          (clk             ),
-	// .en           (en              ),
-	// .rst          (reset           ),
-	// .load         (load            ),
-	// .shift_reg    (trng_data_in    ),
-	// .shift_reg_vld(trng_data_in_vld)
-	// );
-// `elsif
+`ifdef WITH_VONNEUMAN
+	comb_d trng (
+	.clk          (clk             ),
+	.en           (en              ),
+	.rst          (reset           ),
+	.load         (load            ),
+	.shift_reg    (trng_data_in    ),
+	.shift_reg_vld(trng_data_in_vld)
+	);
+`else 
 	comb_d_without_von trng (
 		.clk          (clk             ),
 		.en           (en              ),
@@ -94,7 +98,7 @@ module top_module (
 		.shift_reg    (trng_data_in    ),
 		.shift_reg_vld(trng_data_in_vld)
 	);
-// `endif
+`endif
 
 	always_ff @(posedge clk) begin
 		if(reset)
@@ -105,7 +109,7 @@ module top_module (
 
 	genvar i;
 	generate
-		for (i = 0; i < 8; i++) begin
+		for (i = 0; i < 4; i++) begin : new_block
 			seven_seg_display i_seven_seg_display (
 				.hex_value(hex_value[i*4+:4]),
 				.segments (segment[i]       )
@@ -117,10 +121,10 @@ module top_module (
 	assign HEX_1 = segment[1];
 	assign HEX_2 = segment[2];
 	assign HEX_3 = segment[3];
-	assign HEX_4 = segment[4];
-	assign HEX_5 = segment[5];
-	assign HEX_6 = segment[6];
-	assign HEX_7 = segment[7];
+	// assign HEX_4 = segment[4];
+	// assign HEX_5 = segment[5];
+	// assign HEX_6 = segment[6];
+	// assign HEX_7 = segment[7];
 
 	trng_to_chacha i_trng_to_chacha (
 		.clk             (clk              ),
@@ -219,14 +223,14 @@ module top_module (
 	);
 
 	uart_tx i_uart_tx (
-		.clk    (clk                 ),
-		.reset  (reset               ),
-		.tick   (tick                ),
-		.data_in(uart_tx_data_out    ),
-		.start  (uart_tx_data_out_vld),
-		.tx     (tx                  ),
-		.busy   (uart_tx_busy        ),
-		.done   (uart_tx_done        )
+		.clk    (clk                   ),
+		.reset  (reset                 ),
+		.tick   (tick                  ),
+		.data_in(mux_out_data_to_tx    ),
+		.start  (mux_out_data_to_tx_vld),
+		.tx     (tx                    ),
+		.busy   (uart_tx_busy          ),
+		.done   (uart_tx_done          )
 	);
 
 endmodule

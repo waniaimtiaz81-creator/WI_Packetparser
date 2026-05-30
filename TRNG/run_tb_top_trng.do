@@ -6,7 +6,7 @@ if {[file exists work]} {
 vlib work
 
 vlog -sv clk_divider.v          
-vlog -sv dff.v                   
+vlog -sv dff_logic.v                   
 vlog -sv shift_register.v      
 vlog -sv top_trng.sv             
 vlog -sv comb_d.sv    
