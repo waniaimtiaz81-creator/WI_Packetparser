@@ -2,15 +2,15 @@ module mux_to_uart_tx (
 	input  logic         clk                   ,
 	input  logic         reset                 ,
 	input  logic [  1:0] mux_slect             ,
-	input  logic [512:0] plain_text            ,
+	input  logic [511:0] plain_text            ,
 	input  logic         plain_text_vld        ,
-	input  logic [512:0] encrypted_data        ,
+	input  logic [511:0] encrypted_data        ,
 	input  logic         encrypted_data_vld    ,
-	input  logic [512:0] decrypted_data        ,
+	input  logic [511:0] decrypted_data        ,
 	input  logic         decrypted_data_vld    ,
-	input  logic [512:0] status_data           ,
+	input  logic [511:0] status_data           ,
 	input  logic         status_data_vld       ,
-	output logic [512:0] mux_out_data_to_tx    ,
+	output logic [511:0] mux_out_data_to_tx    ,
 	output logic         mux_out_data_to_tx_vld
 );
 

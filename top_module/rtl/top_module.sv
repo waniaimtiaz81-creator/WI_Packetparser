@@ -24,7 +24,7 @@ module top_module (
 	logic [511:0] trng_data_out    ;
 	logic         trng_data_out_vld;
 
-	logic [31:0]      hex_value;
+	logic [15:0]      hex_value;
 	logic [ 3:0][6:0] segment  ;
 
 	logic [511:0] chacha_data_in               ;
@@ -47,9 +47,17 @@ module top_module (
 	logic [511:0] mux_out_data_to_tx    ;
 	logic         mux_out_data_to_tx_vld;
 
+  logic [  5:0] reset_pre             ;
   logic         reset                 ;
 
-  assign reset = ~raw_reset;
+  assign reset_pre[0] = ~raw_reset;
+
+  always_ff @(posedge clk or negedge raw_reset) begin
+  	if(~raw_reset) 
+  		{reset, reset_pre[5:1]} <= 6'h3F;
+		else 
+  		{reset, reset_pre[5:1]} <= reset_pre;
+  end
 
 	baud_gen #(.BAUD_DIV(5208)) i_baud_gen (
 		.clk  (clk  ),
@@ -100,7 +108,7 @@ module top_module (
 		if(reset)
 			hex_value <= 0;
 		else if(trng_data_in_vld)
-			hex_value <= trng_data_in;
+			hex_value <= trng_data_in[15:0];
 	end
 
 	genvar i;
@@ -113,10 +121,10 @@ module top_module (
 		end
 	endgenerate
 
-	assign HEX_0 = segment[0];
-	assign HEX_1 = segment[1];
-	assign HEX_2 = segment[2];
-	assign HEX_3 = segment[3];
+	assign HEX_0 = ~segment[0];
+	assign HEX_1 = ~segment[1];
+	assign HEX_2 = ~segment[2];
+	assign HEX_3 = ~segment[3];
 
 	trng_to_chacha i_trng_to_chacha (
 		.clk             (clk              ),
